@@ -15,10 +15,10 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    app.waitForService(ChatService, chatService =>
-      chatService.addTools(packageJSON.name, tools)
-    );
     if (config.polymarket) {
+      app.waitForService(ChatService, chatService =>
+        chatService.addTools(packageJSON.name, tools)
+      );
       app.addServices(new PolymarketService(config.polymarket));
     }
   },

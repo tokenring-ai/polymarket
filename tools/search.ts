@@ -15,7 +15,7 @@ async function execute(
     throw new Error(`[${name}] query is required`);
   }
 
-  agent.infoLine(`[polymarketSearch] Searching: ${query}`);
+  agent.infoMessage(`[polymarketSearch] Searching: ${query}`);
   const results = await polymarket.searchMarkets(query);
   return {results};
 }

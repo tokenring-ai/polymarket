@@ -11,7 +11,7 @@ async function execute(
 ): Promise<{events?: any}> {
   const polymarket = agent.requireServiceByType(PolymarketService);
 
-  agent.infoLine(`[polymarketListEvents] Fetching events`);
+  agent.infoMessage(`[polymarketListEvents] Fetching events`);
   const events = await polymarket.listEvents({limit, offset, closed, tag_id});
   return {events};
 }

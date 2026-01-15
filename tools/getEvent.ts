@@ -15,7 +15,7 @@ async function execute(
     throw new Error(`[${name}] slug is required`);
   }
 
-  agent.infoLine(`[polymarketGetEvent] Fetching event: ${slug}`);
+  agent.infoMessage(`[polymarketGetEvent] Fetching event: ${slug}`);
   const event = await polymarket.getEventBySlug(slug);
   return {event};
 }

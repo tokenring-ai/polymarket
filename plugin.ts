@@ -2,9 +2,9 @@ import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
 import {z} from "zod";
 import packageJSON from './package.json' with {type: 'json'};
+import PolymarketService, {PolymarketConfigSchema} from "./PolymarketService.ts";
 
 import tools from "./tools.ts";
-import PolymarketService, {PolymarketConfigSchema} from "./PolymarketService.ts";
 
 const packageConfigSchema = z.object({
   polymarket: PolymarketConfigSchema.optional()

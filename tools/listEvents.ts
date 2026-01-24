@@ -4,6 +4,7 @@ import {z} from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
 const name = "polymarket_listEvents";
+const displayName = "Polymarket/listEvents";
 
 async function execute(
   {limit, offset, closed, tag_id}: z.output<typeof inputSchema>,
@@ -26,5 +27,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
@@ -9,12 +9,15 @@ const displayName = "Polymarket/listEvents";
 async function execute(
   {limit, offset, closed, tag_id}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<{events?: any}> {
+): Promise<TokenRingToolJSONResult<{events?: any}>> {
   const polymarket = agent.requireServiceByType(PolymarketService);
 
   agent.infoMessage(`[polymarketListEvents] Fetching events`);
   const events = await polymarket.listEvents({limit, offset, closed, tag_id});
-  return {events};
+  return {
+    type: "json",
+    data: {events}
+  };
 }
 
 const description = "List active prediction market events on Polymarket.";

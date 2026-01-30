@@ -1,12 +1,6 @@
 import {TokenRingService} from "@tokenring-ai/app/types";
 import {HttpService} from "@tokenring-ai/utility/http/HttpService";
-import {z} from "zod";
-
-export const PolymarketConfigSchema = z.object({
-  baseUrl: z.string().optional(),
-});
-
-export type PolymarketConfig = z.infer<typeof PolymarketConfigSchema>;
+import type {ParsedPolymarketServiceConfig} from "./schema.ts";
 
 export type PolymarketSearchOptions = {
   limit?: number;
@@ -22,9 +16,9 @@ export default class PolymarketService extends HttpService implements TokenRingS
 
   protected baseUrl: string;
 
-  constructor(config: PolymarketConfig = {}) {
+  constructor(readonly config: ParsedPolymarketServiceConfig) {
     super();
-    this.baseUrl = config.baseUrl || "https://gamma-api.polymarket.com";
+    this.baseUrl = config.baseUrl;
   }
 
   async searchMarkets(query: string): Promise<any> {

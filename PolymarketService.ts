@@ -10,7 +10,7 @@ export type PolymarketSearchOptions = {
 };
 
 export default class PolymarketService extends HttpService implements TokenRingService {
-  name = "PolymarketService";
+  readonly name = "PolymarketService";
   description = "Service for querying Polymarket prediction markets";
   defaultHeaders = {}
 

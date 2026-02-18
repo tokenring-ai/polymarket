@@ -1,6 +1,6 @@
 # @tokenring-ai/polymarket
 
-Polymarket prediction markets integration for Token Ring AI agents. This package provides a service for interacting with the Polymarket API and tools for AI agents to search markets, list events, and retrieve market data.
+Polymarket prediction markets integration for Token Ring AI agents. This package provides a service for interacting with the Polymarket API and tools for AI agents to search markets, list events, and retrieve event data.
 
 ## Overview
 
@@ -9,11 +9,10 @@ The `@tokenring-ai/polymarket` package enables seamless integration with the Pol
 ### Key Features
 
 - **Polymarket Service**: Core service for direct API interactions with Polymarket
-- **Agent Tools**: Four pre-built tools for AI workflows:
+- **Agent Tools**: Three pre-built tools for AI workflows:
   - `polymarket_search`: Search markets, events, and profiles
   - `polymarket_listEvents`: List active prediction market events with filtering
   - `polymarket_getEvent`: Retrieve event details by slug
-  - `polymarket_getMarket`: Retrieve market details by slug
 - **TypeScript Support**: Full TypeScript definitions and type safety
 - **Input Validation**: Zod schemas for robust input validation
 - **Error Handling**: Built-in error handling for API operations
@@ -49,7 +48,7 @@ import TokenRingApp from "@tokenring-ai/app";
 import polymarketPlugin from "@tokenring-ai/polymarket";
 
 const app = new TokenRingApp();
-app.install(polymarketPlugin, {
+app.addPlugin(polymarketPlugin, {
   polymarket: {
     baseUrl: "https://gamma-api.polymarket.com"  // Optional, defaults to Polymarket API
   }
@@ -127,27 +126,6 @@ const result = await agent.executeTool("polymarket_getEvent", {
 // Returns: { event: { id, title, markets: [...], ... } }
 ```
 
-### polymarket_getMarket
-
-Get a specific Polymarket market by its slug (from URL).
-
-**Tool Input Schema:**
-
-```typescript
-z.object({
-  slug: z.string().min(1).describe("Market slug from Polymarket URL"),
-})
-```
-
-**Example usage:**
-
-```typescript
-const result = await agent.executeTool("polymarket_getMarket", {
-  slug: "will-ai-exceed-human-level-performance-by-2025"
-});
-// Returns: { market: { id, title, price, volume, ... } }
-```
-
 ## Services
 
 ### PolymarketService
@@ -157,7 +135,7 @@ The core service class for Polymarket API interactions.
 **Constructor:**
 
 ```typescript
-constructor(config?: PolymarketConfig)
+constructor(config?: ParsedPolymarketServiceConfig)
 ```
 
 **Parameters:**
@@ -213,7 +191,7 @@ Retrieve market details by slug.
 **Example usage:**
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 const polymarket = new PolymarketService({
   baseUrl: "https://gamma-api.polymarket.com"
@@ -232,7 +210,7 @@ const events = await polymarket.listEvents({
 const event = await polymarket.getEventBySlug("ai-regulation-2024");
 
 // Get specific market
-const market = await polymarket.getMarketBySlug("will-ai-exceed-human-level-performance-by-2025");
+const market = await polymarket.getMarketBySlug("ai-regulation-2024");
 ```
 
 ## Providers
@@ -244,7 +222,7 @@ The `PolymarketService` is a TokenRingService that can be required by agents usi
 **Provider Type:**
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 // In an agent context
 const polymarket = agent.requireServiceByType(PolymarketService);
@@ -284,8 +262,7 @@ pkg/polymarket/
 ├── tools/
 │   ├── search.ts            # Polymarket search tool
 │   ├── listEvents.ts        # List events tool
-│   ├── getEvent.ts          # Get event by slug tool
-│   └── getMarket.ts         # Get market by slug tool
+│   └── getEvent.ts          # Get event by slug tool
 ├── package.json             # Package metadata and dependencies
 ├── vitest.config.ts         # Vitest configuration
 └── README.md                # This documentation
@@ -312,7 +289,7 @@ bun run test
 You can configure the service to use different API endpoints:
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 // Production API (default)
 const polymarket = new PolymarketService();
@@ -354,9 +331,6 @@ await polymarket.searchMarkets("");  // Error: "query is required"
 
 // Empty slug throws error
 await polymarket.getEventBySlug("");  // Error: "slug is required"
-
-// Empty slug for market throws error
-await polymarket.getMarketBySlug("");  // Error: "slug is required"
 ```
 
 ## Examples
@@ -364,7 +338,7 @@ await polymarket.getMarketBySlug("");  // Error: "slug is required"
 ### Basic Search and List Events
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 const polymarket = new PolymarketService();
 
@@ -374,7 +348,7 @@ console.log("Search results:", searchResults.events);
 
 // List active events
 const events = await polymarket.listEvents({
-  limit: 5,
+  limit: 10,
   closed: false
 });
 console.log("Active events:", events);
@@ -384,8 +358,8 @@ console.log("Active events:", events);
 
 ```typescript
 // In a Token Ring agent
-async function analyzeMarket(topic: string) {
-  // Search for relevant markets
+async function analyzeEvent(topic: string) {
+  // Search for relevant events
   const searchResult = await agent.executeTool("polymarket_search", {
     query: topic
   });
@@ -404,14 +378,14 @@ async function analyzeMarket(topic: string) {
     };
   }
 
-  throw new Error("No relevant markets found");
+  throw new Error("No relevant events found");
 }
 ```
 
 ### Pagination Example
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 const polymarket = new PolymarketService();
 
@@ -433,7 +407,7 @@ const page2 = await polymarket.listEvents({
 ### Tag Filtering Example
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 const polymarket = new PolymarketService();
 
@@ -443,29 +417,21 @@ const techEvents = await polymarket.listEvents({
   tag_id: 12345,
   closed: false
 });
-
-// Fetch markets filtered by a specific tag
-const techMarkets = await polymarket.searchMarkets({
-  query: "AI",
-  tag_id: 12345
-});
 ```
 
-### Getting Market Details
+### Getting Event Details
 
 ```typescript
-import PolymarketService from "@tokenring-ai/polymarket";
+import { PolymarketService } from "@tokenring-ai/polymarket";
 
 const polymarket = new PolymarketService();
 
-// Get market by slug
-const market = await polymarket.getMarketBySlug("will-ai-exceed-human-level-performance-by-2025");
+// Get event by slug
+const event = await polymarket.getEventBySlug("will-ai-exceed-human-level-performance-by-2025");
 
-console.log("Market Title:", market.title);
-console.log("Current Price:", market.price);
-console.log("Yes Share Volume:", market.yes_share_volume);
-console.log("No Share Volume:", market.no_share_volume);
-console.log("Total Volume:", market.total_share_volume);
+console.log("Event Title:", event.title);
+console.log("Markets:", event.markets);
+console.log("Volume:", event.volume);
 ```
 
 ## Best Practices
@@ -477,12 +443,12 @@ console.log("Total Volume:", market.total_share_volume);
 - **Filtering**: Use tag_id and closed filters to narrow results
 - **Slug Format**: Extract slugs from Polymarket URLs for accurate lookups
 
-### Market Analysis
+### Event Analysis
 
-- **Compare Markets**: Use search to find related markets for comparison
+- **Compare Events**: Use search to find related events for comparison
 - **Track Events**: Use listEvents to monitor events over time
-- **Analyze Data**: Use getEvent and getMarket for detailed analysis
-- **Volume Analysis**: Check yes_share_volume and no_share_volume for market depth
+- **Analyze Data**: Use getEvent for detailed analysis
+- **Volume Analysis**: Check event volume for market depth
 
 ### Performance Considerations
 
@@ -509,17 +475,17 @@ console.log("Total Volume:", market.total_share_volume);
 
 **Solution**:
 - Try different search queries
-- Check that markets exist for the query
+- Check that events exist for the query
 - Verify the search syntax is correct
-- Try listing events to see available markets
+- Try listing events to see available events
 
-### Event/Market Not Found
+### Event Not Found
 
-**Problem**: getEvent or getMarket returns error
+**Problem**: getEvent returns error
 
 **Solution**:
 - Verify the slug is correct (check from search results)
-- Ensure the event/market exists and is not closed
+- Ensure the event exists and is not closed
 - Check that the slug matches the API format
 - Use search to find the correct slug
 
@@ -542,6 +508,22 @@ console.log("Total Volume:", market.total_share_volume);
 - Check that the URL uses HTTPS
 - Ensure the base URL ends with a trailing slash
 - Test the URL in a browser or curl
+
+## Dependencies
+
+### Production Dependencies
+
+- `@tokenring-ai/app` - Base application framework and plugin system
+- `@tokenring-ai/chat` - Chat service and tool system
+- `@tokenring-ai/agent` - Central orchestration system
+- `@tokenring-ai/utility` - Shared utilities including HttpService
+- `zod` - Runtime type validation and schema definition
+
+### Development Dependencies
+
+- `vitest` - Testing framework
+- `@vitest/coverage-v8` - Coverage reporting
+- `typescript` - TypeScript compiler
 
 ## License
 

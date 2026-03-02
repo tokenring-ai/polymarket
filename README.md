@@ -4,12 +4,12 @@ Polymarket prediction markets integration for Token Ring AI agents. This package
 
 ## Overview
 
-The `@tokenring-ai/polymarket` package enables seamless integration with the Polymarket API for querying prediction markets and events. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to access real-time prediction market data.
+The `@tokenring-ai/polymarket` package enables seamless integration with the Polymarket Gamma API for querying prediction markets and events. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to access real-time prediction market data through a service-based architecture and pre-built agent tools.
 
 ### Key Features
 
-- **Polymarket Service**: Core service for direct API interactions with Polymarket
-- **Agent Tools**: Three pre-built tools for AI workflows:
+- **PolymarketService**: Core service for direct API interactions with Polymarket Gamma API
+- **Three Agent Tools**: Pre-built tools for AI workflows:
   - `polymarket_search`: Search markets, events, and profiles
   - `polymarket_listEvents`: List active prediction market events with filtering
   - `polymarket_getEvent`: Retrieve event details by slug
@@ -18,6 +18,7 @@ The `@tokenring-ai/polymarket` package enables seamless integration with the Pol
 - **Error Handling**: Built-in error handling for API operations
 - **Configurable**: Support for custom API base URLs
 - **Plugin Architecture**: Integrates seamlessly with Token Ring app ecosystem
+- **Event-Driven**: Leverages Token Ring's event system for agent communication
 
 ## Installation
 
@@ -130,17 +131,23 @@ const result = await agent.executeTool("polymarket_getEvent", {
 
 ### PolymarketService
 
-The core service class for Polymarket API interactions.
+The core service class for Polymarket API interactions. Extends `HttpService` and implements `TokenRingService`.
 
 **Constructor:**
 
 ```typescript
-constructor(config?: ParsedPolymarketServiceConfig)
+constructor(config: ParsedPolymarketServiceConfig)
 ```
 
 **Parameters:**
 
-- `config.baseUrl` (string, optional): Base URL for Polymarket API (defaults to "https://gamma-api.polymarket.com")
+- `config.baseUrl` (string): Base URL for Polymarket API (defaults to "https://gamma-api.polymarket.com")
+
+**Properties:**
+
+- `name` (string): "PolymarketService"
+- `description` (string): "Service for querying Polymarket prediction markets"
+- `config` (ParsedPolymarketServiceConfig): Service configuration
 
 **Methods:**
 
@@ -150,23 +157,29 @@ Search Polymarket for markets, events, and profiles.
 
 **Parameters:**
 
-- `query` (string): Search term (required)
+- `query` (string): Search term (required, must be non-empty)
 
-**Returns:** Promise resolving to Polymarket API search response
+**Returns:** Promise resolving to Polymarket API search response containing events, tags, and profiles
 
-#### listEvents(options?: PolymarketSearchOptions): Promise<any>
+**Throws:** Error if query is empty
+
+**API Endpoint:** `GET /public-search?q={query}`
+
+#### listEvents(opts?: PolymarketSearchOptions): Promise<any>
 
 List prediction market events with filtering.
 
 **Parameters:**
 
-- `options` (PolymarketSearchOptions, optional):
-  - `limit` (number): Maximum number of results (default: 10)
+- `opts` (PolymarketSearchOptions, optional):
+  - `limit` (number): Maximum number of results (default: 10, max: 100)
   - `offset` (number): Pagination offset (default: 0)
   - `closed` (boolean): Include closed markets (default: false)
   - `tag_id` (number): Filter by tag ID
 
 **Returns:** Promise resolving to array of events
+
+**API Endpoint:** `GET /events?limit={limit}&offset={offset}&closed={closed}&tag_id={tag_id}`
 
 #### getEventBySlug(slug: string): Promise<any>
 
@@ -174,9 +187,13 @@ Retrieve event details by slug.
 
 **Parameters:**
 
-- `slug` (string): Event slug from Polymarket URL (required)
+- `slug` (string): Event slug from Polymarket URL (required, must be non-empty)
 
-**Returns:** Promise resolving to event object
+**Returns:** Promise resolving to event object with markets, tags, and metadata
+
+**Throws:** Error if slug is empty
+
+**API Endpoint:** `GET /events/slug/{slug}`
 
 #### getMarketBySlug(slug: string): Promise<any>
 
@@ -184,9 +201,13 @@ Retrieve market details by slug.
 
 **Parameters:**
 
-- `slug` (string): Market slug from Polymarket URL (required)
+- `slug` (string): Market slug from Polymarket URL (required, must be non-empty)
 
-**Returns:** Promise resolving to market object
+**Returns:** Promise resolving to market object with outcomes and trading data
+
+**Throws:** Error if slug is empty
+
+**API Endpoint:** `GET /markets/slug/{slug}`
 
 **Example usage:**
 
@@ -248,7 +269,7 @@ This package does not define RPC endpoints.
 
 ## State Management
 
-This package does not implement state persistence or restoration.
+This package does not implement state persistence or restoration. The service is stateless and maintains no internal state between requests.
 
 ## Package Structure
 
@@ -265,7 +286,14 @@ pkg/polymarket/
 │   └── getEvent.ts          # Get event by slug tool
 ├── package.json             # Package metadata and dependencies
 ├── vitest.config.ts         # Vitest configuration
-└── README.md                # This documentation
+├── README.md                # This documentation
+└── design/                  # Design documentation
+    ├── fetch-markets-guide.md
+    ├── search-markets-events-and-profiles.md
+    ├── list-markets.md
+    ├── get-market-by-slug.md
+    ├── list-events.md
+    └── get-event-by-slug.md
 ```
 
 ## Testing
@@ -282,6 +310,15 @@ bun run test
 - `bun run test:watch` - Run tests in watch mode
 - `bun run test:coverage` - Run tests with coverage report
 
+**Test configuration:**
+
+The package uses vitest with the following configuration:
+
+- Environment: Node.js
+- Globals: Enabled
+- Isolation: Enabled
+- Test files: `**/*.test.ts`
+
 ## Configuration
 
 ### Base URL Configuration
@@ -292,7 +329,7 @@ You can configure the service to use different API endpoints:
 import { PolymarketService } from "@tokenring-ai/polymarket";
 
 // Production API (default)
-const polymarket = new PolymarketService();
+const polymarket = new PolymarketService({});
 
 // Custom endpoint
 const customPolymarket = new PolymarketService({
@@ -314,13 +351,26 @@ export const PolymarketConfigSchema = z.object({
 export type ParsedPolymarketServiceConfig = z.output<typeof PolymarketConfigSchema>;
 ```
 
+### PolymarketSearchOptions
+
+Type definition for listEvents options:
+
+```typescript
+export type PolymarketSearchOptions = {
+  limit?: number;
+  offset?: number;
+  closed?: boolean;
+  tag_id?: number;
+};
+```
+
 ## Error Handling
 
 The service includes comprehensive error handling:
 
 - **Invalid inputs**: Throws descriptive errors for missing required parameters
-- **API failures**: Handles HTTP errors and non-OK responses
-- **Network issues**: Uses retry logic for transient failures
+- **API failures**: Handles HTTP errors and non-OK responses via HttpService
+- **Network issues**: Uses retry logic for transient failures (inherited from HttpService)
 - **JSON parsing**: Validates and sanitizes API responses
 
 **Error examples:**
@@ -331,6 +381,9 @@ await polymarket.searchMarkets("");  // Error: "query is required"
 
 // Empty slug throws error
 await polymarket.getEventBySlug("");  // Error: "slug is required"
+
+// Empty query in tool throws error
+await agent.executeTool("polymarket_search", { query: "" });  // Error: "[polymarket_search] query is required"
 ```
 
 ## Examples
@@ -340,7 +393,7 @@ await polymarket.getEventBySlug("");  // Error: "slug is required"
 ```typescript
 import { PolymarketService } from "@tokenring-ai/polymarket";
 
-const polymarket = new PolymarketService();
+const polymarket = new PolymarketService({});
 
 // Search for markets
 const searchResults = await polymarket.searchMarkets("presidential election");
@@ -387,7 +440,7 @@ async function analyzeEvent(topic: string) {
 ```typescript
 import { PolymarketService } from "@tokenring-ai/polymarket";
 
-const polymarket = new PolymarketService();
+const polymarket = new PolymarketService({});
 
 // Fetch first page
 const page1 = await polymarket.listEvents({
@@ -409,7 +462,7 @@ const page2 = await polymarket.listEvents({
 ```typescript
 import { PolymarketService } from "@tokenring-ai/polymarket";
 
-const polymarket = new PolymarketService();
+const polymarket = new PolymarketService({});
 
 // Fetch events filtered by a specific tag
 const techEvents = await polymarket.listEvents({
@@ -424,7 +477,7 @@ const techEvents = await polymarket.listEvents({
 ```typescript
 import { PolymarketService } from "@tokenring-ai/polymarket";
 
-const polymarket = new PolymarketService();
+const polymarket = new PolymarketService({});
 
 // Get event by slug
 const event = await polymarket.getEventBySlug("will-ai-exceed-human-level-performance-by-2025");
@@ -432,6 +485,21 @@ const event = await polymarket.getEventBySlug("will-ai-exceed-human-level-perfor
 console.log("Event Title:", event.title);
 console.log("Markets:", event.markets);
 console.log("Volume:", event.volume);
+```
+
+### Getting Market Details
+
+```typescript
+import { PolymarketService } from "@tokenring-ai/polymarket";
+
+const polymarket = new PolymarketService({});
+
+// Get market by slug
+const market = await polymarket.getMarketBySlug("will-ai-exceed-human-level-performance-by-2025");
+
+console.log("Market Question:", market.question);
+console.log("Outcomes:", market.outcomes);
+console.log("Volume:", market.volume);
 ```
 
 ## Best Practices
@@ -442,6 +510,7 @@ console.log("Volume:", event.volume);
 - **Pagination**: Use offset and limit for large result sets (max 100 per request)
 - **Filtering**: Use tag_id and closed filters to narrow results
 - **Slug Format**: Extract slugs from Polymarket URLs for accurate lookups
+- **Rate Limiting**: Implement delays between requests for production use
 
 ### Event Analysis
 
@@ -452,10 +521,20 @@ console.log("Volume:", event.volume);
 
 ### Performance Considerations
 
-- **Caching**: Cache API responses when appropriate
-- **Rate Limiting**: Respect API limits for production applications
+- **Caching**: Cache API responses when appropriate to reduce API calls
 - **Batch Operations**: Use listEvents for multiple events instead of individual calls
 - **Error Recovery**: Implement retry logic for transient failures
+- **Connection Reuse**: The service inherits connection pooling from HttpService
+
+### Slug Extraction
+
+Slugs can be extracted from Polymarket URLs:
+
+```
+https://polymarket.com/event/fed-decision-in-october?tid=1758818660485
+                            ↑
+                  Slug: fed-decision-in-october
+```
 
 ## Troubleshooting
 
@@ -463,7 +542,7 @@ console.log("Volume:", event.volume);
 
 **Problem**: API requests fail with HTTP errors
 
-**Solution**:
+**Solution:**
 - Verify the baseUrl is correct
 - Check network connectivity to Polymarket API
 - Ensure API is not temporarily down
@@ -473,7 +552,7 @@ console.log("Volume:", event.volume);
 
 **Problem**: Search returns no results
 
-**Solution**:
+**Solution:**
 - Try different search queries
 - Check that events exist for the query
 - Verify the search syntax is correct
@@ -483,7 +562,7 @@ console.log("Volume:", event.volume);
 
 **Problem**: getEvent returns error
 
-**Solution**:
+**Solution:**
 - Verify the slug is correct (check from search results)
 - Ensure the event exists and is not closed
 - Check that the slug matches the API format
@@ -493,7 +572,7 @@ console.log("Volume:", event.volume);
 
 **Problem**: API returns 429 Too Many Requests
 
-**Solution**:
+**Solution:**
 - Implement retry logic with exponential backoff
 - Add delays between requests
 - Monitor API rate limits
@@ -503,10 +582,10 @@ console.log("Volume:", event.volume);
 
 **Problem**: API requests fail with incorrect configuration
 
-**Solution**:
+**Solution:**
 - Verify baseUrl is set correctly
 - Check that the URL uses HTTPS
-- Ensure the base URL ends with a trailing slash
+- Ensure the base URL ends with a trailing slash (optional, handled by HttpService)
 - Test the URL in a browser or curl
 
 ## Dependencies
@@ -524,6 +603,13 @@ console.log("Volume:", event.volume);
 - `vitest` - Testing framework
 - `@vitest/coverage-v8` - Coverage reporting
 - `typescript` - TypeScript compiler
+
+## Related Components
+
+- **@tokenring-ai/app**: Base application framework providing plugin and service architecture
+- **@tokenring-ai/agent**: Agent system that uses the Polymarket tools
+- **@tokenring-ai/chat**: Chat service that registers the Polymarket tools
+- **@tokenring-ai/utility**: Provides HttpService base class for API interactions
 
 ## License
 

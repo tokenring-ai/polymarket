@@ -1,7 +1,7 @@
 import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
 import {z} from "zod";
-import packageJSON from './package.json' with {type: 'json'};
+import packageJSON from "./package.json" with {type: "json"};
 import PolymarketService from "./PolymarketService.ts";
 import {PolymarketConfigSchema} from "./schema.ts";
 

@@ -1,4 +1,4 @@
-import {TokenRingService} from "@tokenring-ai/app/types";
+import type {TokenRingService} from "@tokenring-ai/app/types";
 import {HttpService} from "@tokenring-ai/utility/http/HttpService";
 import type {ParsedPolymarketServiceConfig} from "./schema.ts";
 
@@ -9,7 +9,9 @@ export type PolymarketSearchOptions = {
   tag_id?: number;
 };
 
-export default class PolymarketService extends HttpService implements TokenRingService {
+export default class PolymarketService
+  extends HttpService
+  implements TokenRingService {
   readonly name = "PolymarketService";
   description = "Service for querying Polymarket prediction markets";
   defaultHeaders = {};
@@ -21,14 +23,18 @@ export default class PolymarketService extends HttpService implements TokenRingS
     this.baseUrl = config.baseUrl;
   }
 
-  async searchMarkets(query: string): Promise<any> {
+  searchMarkets(query: string): Promise<any> {
     if (!query) throw new Error("query is required");
 
     const params = new URLSearchParams({q: query});
-    return this.fetchJson(`/public-search?${params}`, {method: "GET"}, "Polymarket search");
+    return this.fetchJson(
+      `/public-search?${params}`,
+      {method: "GET"},
+      "Polymarket search",
+    );
   }
 
-  async listEvents(opts: PolymarketSearchOptions = {}): Promise<any> {
+  listEvents(opts: PolymarketSearchOptions = {}): Promise<any> {
     const params = new URLSearchParams({
       limit: String(opts.limit || 10),
       offset: String(opts.offset || 0),
@@ -36,16 +42,28 @@ export default class PolymarketService extends HttpService implements TokenRingS
     });
     if (opts.tag_id) params.set("tag_id", String(opts.tag_id));
 
-    return this.fetchJson(`/events?${params}`, {method: "GET"}, "Polymarket list events");
+    return this.fetchJson(
+      `/events?${params}`,
+      {method: "GET"},
+      "Polymarket list events",
+    );
   }
 
-  async getEventBySlug(slug: string): Promise<any> {
+  getEventBySlug(slug: string): Promise<any> {
     if (!slug) throw new Error("slug is required");
-    return this.fetchJson(`/events/slug/${slug}`, {method: "GET"}, "Polymarket get event");
+    return this.fetchJson(
+      `/events/slug/${slug}`,
+      {method: "GET"},
+      "Polymarket get event",
+    );
   }
 
-  async getMarketBySlug(slug: string): Promise<any> {
+  getMarketBySlug(slug: string): Promise<any> {
     if (!slug) throw new Error("slug is required");
-    return this.fetchJson(`/markets/slug/${slug}`, {method: "GET"}, "Polymarket get market");
+    return this.fetchJson(
+      `/markets/slug/${slug}`,
+      {method: "GET"},
+      "Polymarket get market",
+    );
   }
 }

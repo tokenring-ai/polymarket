@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
@@ -9,7 +9,7 @@ const displayName = "Polymarket/getEvent";
 async function execute(
   {slug}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<TokenRingToolJSONResult<{ event?: any }>> {
+): Promise<TokenRingToolResult> {
   const polymarket = agent.requireServiceByType(PolymarketService);
 
   if (!slug) {
@@ -18,10 +18,7 @@ async function execute(
 
   agent.infoMessage(`[polymarketGetEvent] Fetching event: ${slug}`);
   const event = await polymarket.getEventBySlug(slug);
-  return {
-    type: "json",
-    data: {event},
-  };
+  return JSON.stringify(event);
 }
 
 const description = "Get a specific Polymarket event by its slug (from URL).";

@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
@@ -9,7 +9,7 @@ const displayName = "Polymarket/search";
 async function execute(
   {query}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<TokenRingToolJSONResult<{ results?: any }>> {
+): Promise<TokenRingToolResult> {
   const polymarket = agent.requireServiceByType(PolymarketService);
 
   if (!query) {
@@ -18,10 +18,7 @@ async function execute(
 
   agent.infoMessage(`[polymarketSearch] Searching: ${query}`);
   const results = await polymarket.searchMarkets(query);
-  return {
-    type: "json",
-    data: {results},
-  };
+  return JSON.stringify(results);
 }
 
 const description =

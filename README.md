@@ -47,7 +47,7 @@ constructor(config: ParsedPolymarketServiceConfig)
 
 **Parameters:**
 
-- `config.baseUrl` (string): Base URL for Polymarket API (defaults to "https://gamma-api.polymarket.com")
+- `config.baseUrl` (string): Base URL for Polymarket API (defaults to "<https://gamma-api.polymarket.com>")
 
 **Properties:**
 
@@ -564,6 +564,7 @@ await agent.executeTool("polymarket_search", { query: "" });  // Error: "[polyma
 **Problem**: API requests fail with HTTP errors
 
 **Solution:**
+
 - Verify the baseUrl is correct
 - Check network connectivity to Polymarket API
 - Ensure API is not temporarily down
@@ -574,6 +575,7 @@ await agent.executeTool("polymarket_search", { query: "" });  // Error: "[polyma
 **Problem**: Search returns no results
 
 **Solution:**
+
 - Try different search queries
 - Check that events exist for the query
 - Verify the search syntax is correct
@@ -584,6 +586,7 @@ await agent.executeTool("polymarket_search", { query: "" });  // Error: "[polyma
 **Problem**: getEvent returns error
 
 **Solution:**
+
 - Verify the slug is correct (check from search results)
 - Ensure the event exists and is not closed
 - Check that the slug matches the API format
@@ -594,6 +597,7 @@ await agent.executeTool("polymarket_search", { query: "" });  // Error: "[polyma
 **Problem**: API returns 429 Too Many Requests
 
 **Solution:**
+
 - Implement retry logic with exponential backoff
 - Add delays between requests
 - Monitor API rate limits
@@ -604,6 +608,7 @@ await agent.executeTool("polymarket_search", { query: "" });  // Error: "[polyma
 **Problem**: API requests fail with incorrect configuration
 
 **Solution:**
+
 - Verify baseUrl is set correctly
 - Check that the URL uses HTTPS
 - Ensure the base URL ends with a trailing slash (optional, handled by HttpService)

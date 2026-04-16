@@ -18,7 +18,7 @@ export default {
   description: packageJSON.description,
   install(app, config) {
     app.waitForService(ChatService, (chatService) =>
-      chatService.addTools(tools),
+      chatService.addTools(...tools),
     );
     app.addServices(new PolymarketService(config.polymarket));
   },

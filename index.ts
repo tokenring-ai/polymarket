@@ -1,1 +1,1 @@
-export {default as PolymarketService} from "./PolymarketService.ts";
+export { default as PolymarketService } from "./PolymarketService.ts";

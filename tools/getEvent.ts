@@ -1,15 +1,12 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
 const name = "polymarket_getEvent";
 const displayName = "Polymarket/getEvent";
 
-async function execute(
-  {slug}: z.output<typeof inputSchema>,
-  agent: Agent,
-): Promise<TokenRingToolResult> {
+async function execute({ slug }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const polymarket = agent.requireServiceByType(PolymarketService);
 
   if (!slug) {

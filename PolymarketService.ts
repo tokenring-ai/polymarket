@@ -1,5 +1,7 @@
 import type { TokenRingService } from "@tokenring-ai/app/types";
-import { HttpService } from "@tokenring-ai/utility/http/HttpService";
+import type { JSONValue } from "@tokenring-ai/utility/json/safeParse";
+import { JSONValueSchema } from "@tokenring-ai/utility/json/schema";
+import { HTTPRetriever } from "@tokenring-ai/utility/http/HTTPRetriever";
 import type { ParsedPolymarketServiceConfig } from "./schema.ts";
 
 export type PolymarketSearchOptions = {
@@ -9,26 +11,33 @@ export type PolymarketSearchOptions = {
   tag_id?: number | undefined;
 };
 
-export default class PolymarketService extends HttpService implements TokenRingService {
+export default class PolymarketService implements TokenRingService {
   readonly name = "PolymarketService";
   description = "Service for querying Polymarket prediction markets";
-  defaultHeaders = {};
 
-  protected baseUrl: string;
+  private readonly retriever: HTTPRetriever;
 
   constructor(readonly config: ParsedPolymarketServiceConfig) {
-    super();
-    this.baseUrl = config.baseUrl;
+    this.retriever = new HTTPRetriever({
+      baseUrl: config.baseUrl,
+      headers: {},
+      timeout: 10_000,
+    });
   }
 
-  searchMarkets(query: string): Promise<any> {
+  searchMarkets(query: string): Promise<JSONValue> {
     if (!query) throw new Error("query is required");
 
     const params = new URLSearchParams({ q: query });
-    return this.fetchJson(`/public-search?${params}`, { method: "GET" }, "Polymarket search");
+    return this.retriever.fetchValidatedJson({
+      url: `/public-search?${params}`,
+      opts: { method: "GET" },
+      schema: JSONValueSchema,
+      context: "Polymarket search",
+    });
   }
 
-  listEvents(opts: PolymarketSearchOptions = {}): Promise<any> {
+  listEvents(opts: PolymarketSearchOptions = {}): Promise<JSONValue> {
     const params = new URLSearchParams({
       limit: String(opts.limit || 10),
       offset: String(opts.offset || 0),
@@ -36,16 +45,31 @@ export default class PolymarketService extends HttpService implements TokenRingS
     });
     if (opts.tag_id) params.set("tag_id", String(opts.tag_id));
 
-    return this.fetchJson(`/events?${params}`, { method: "GET" }, "Polymarket list events");
+    return this.retriever.fetchValidatedJson({
+      url: `/events?${params}`,
+      opts: { method: "GET" },
+      schema: JSONValueSchema,
+      context: "Polymarket list events",
+    });
   }
 
-  getEventBySlug(slug: string): Promise<any> {
+  getEventBySlug(slug: string): Promise<JSONValue> {
     if (!slug) throw new Error("slug is required");
-    return this.fetchJson(`/events/slug/${slug}`, { method: "GET" }, "Polymarket get event");
+    return this.retriever.fetchValidatedJson({
+      url: `/events/slug/${slug}`,
+      opts: { method: "GET" },
+      schema: JSONValueSchema,
+      context: "Polymarket get event",
+    });
   }
 
-  getMarketBySlug(slug: string): Promise<any> {
+  getMarketBySlug(slug: string): Promise<JSONValue> {
     if (!slug) throw new Error("slug is required");
-    return this.fetchJson(`/markets/slug/${slug}`, { method: "GET" }, "Polymarket get market");
+    return this.retriever.fetchValidatedJson({
+      url: `/markets/slug/${slug}`,
+      opts: { method: "GET" },
+      schema: JSONValueSchema,
+      context: "Polymarket get market",
+    });
   }
 }

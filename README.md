@@ -1,18 +1,21 @@
 # @tokenring-ai/polymarket
 
-Polymarket prediction markets integration for Token Ring AI agents. This package provides a service for interacting with the Polymarket API and tools for AI agents to search markets, list events, and retrieve event data.
+Polymarket prediction markets integration for Token Ring AI agents. This package provides a service for interacting with
+the Polymarket API and tools for AI agents to search markets, list events, and retrieve event data.
 
 ## Overview
 
-The `@tokenring-ai/polymarket` package enables seamless integration with the Polymarket Gamma API for querying prediction markets and events. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to access real-time prediction market data through a service-based architecture and pre-built agent tools.
+The `@tokenring-ai/polymarket` package enables seamless integration with the Polymarket Gamma API for querying
+prediction markets and events. It is designed specifically for use within the Token Ring AI agent framework, allowing
+agents to access real-time prediction market data through a service-based architecture and pre-built agent tools.
 
 ### Key Features
 
 - **PolymarketService**: Core service for direct API interactions with Polymarket Gamma API
 - **Three Agent Tools**: Pre-built tools for AI workflows:
-  - `polymarket_search`: Search markets, events, and profiles
-  - `polymarket_listEvents`: List active prediction market events with filtering
-  - `polymarket_getEvent`: Retrieve event details by slug
+- `polymarket_search`: Search markets, events, and profiles
+- `polymarket_listEvents`: List active prediction market events with filtering
+- `polymarket_getEvent`: Retrieve event details by slug
 - **TypeScript Support**: Full TypeScript definitions and type safety
 - **Input Validation**: Zod schemas for robust input validation
 - **Error Handling**: Built-in error handling for API operations
@@ -78,10 +81,10 @@ List prediction market events with filtering.
 **Parameters:**
 
 - `opts` (PolymarketSearchOptions, optional):
-  - `limit` (number): Maximum number of results (default: 10, max: 100)
-  - `offset` (number): Pagination offset (default: 0)
-  - `closed` (boolean): Include closed markets (default: false)
-  - `tag_id` (number): Filter by tag ID
+- `limit` (number): Maximum number of results (default: 10, max: 100)
+- `offset` (number): Pagination offset (default: 0)
+- `closed` (boolean): Include closed markets (default: false)
+- `tag_id` (number): Filter by tag ID
 
 **Returns:** Promise resolving to array of events
 
@@ -358,7 +361,8 @@ const customPolymarket = new PolymarketService({
 
 ## State Management
 
-This package does not implement state persistence or restoration. The service is stateless and maintains no internal state between requests.
+This package does not implement state persistence or restoration. The service is stateless and maintains no internal
+state between requests.
 
 ## Usage Examples
 

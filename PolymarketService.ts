@@ -1,7 +1,7 @@
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import { HTTPRetriever } from "@tokenring-ai/utility/http/HTTPRetriever";
 import type { JSONValue } from "@tokenring-ai/utility/json/safeParse";
 import { JSONValueSchema } from "@tokenring-ai/utility/json/schema";
-import { HTTPRetriever } from "@tokenring-ai/utility/http/HTTPRetriever";
 import type { ParsedPolymarketServiceConfig } from "./schema.ts";
 
 export type PolymarketSearchOptions = {

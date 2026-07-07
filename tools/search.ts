@@ -1,5 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { ToolCallError } from "@tokenring-ai/chat/util/tokenRingTool";
 import { z } from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
@@ -10,7 +11,7 @@ async function execute({ query }: z.output<typeof inputSchema>, agent: Agent): P
   const polymarket = agent.requireServiceByType(PolymarketService);
 
   if (!query) {
-    throw new Error(`[${name}] query is required`);
+    throw new ToolCallError(name, `query is required`);
   }
 
   agent.infoMessage(`[polymarketSearch] Searching: ${query}`);

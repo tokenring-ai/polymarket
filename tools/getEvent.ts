@@ -1,5 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { ToolCallError } from "@tokenring-ai/chat/util/tokenRingTool";
 import { z } from "zod";
 import PolymarketService from "../PolymarketService.ts";
 
@@ -10,7 +11,7 @@ async function execute({ slug }: z.output<typeof inputSchema>, agent: Agent): Pr
   const polymarket = agent.requireServiceByType(PolymarketService);
 
   if (!slug) {
-    throw new Error(`[${name}] slug is required`);
+    throw new ToolCallError(name, `slug is required`);
   }
 
   agent.infoMessage(`[polymarketGetEvent] Fetching event: ${slug}`);
